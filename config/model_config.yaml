@@ -1,0 +1,53 @@
+# SageFormer Bocknis Eck 2 — 3-day dissolved oxygen forecast
+# Station: Bocknis Eck 2 (Baltic Sea)
+# Model: NoWind — partners supply only Sal, Temp, Oxygen + timestamps
+# Data resolution: 10 minutes
+# History: 7 days (1008 steps), Prediction: 3 days (432 steps)
+# Test MAE: 0.6678 mg/L  |  Test RMSE: 0.9043 mg/L
+
+model:
+  task_name: long_term_forecast
+  seq_len: 1008       # 7 days × 24 h × 6 steps/h
+  label_len: 504
+  pred_len: 432       # 3 days × 24 h × 6 steps/h
+  enc_in: 7           # hour_sin, hour_cos, day_sin, day_cos, Sal, Temp, Oxygen
+  c_out: 1            # Oxygen only
+  d_model: 512
+  d_ff: 2048
+  n_heads: 8
+  e_layers: 3
+  d_layers: 2
+  dropout: 0.1
+  cls_len: 1
+  graph_depth: 3
+  knn: 16
+  embed_dim: 16
+  factor: 3
+  activation: gelu
+  output_attention: false
+  patch_len: 16
+  stride: 8
+
+data:
+  station: Bocknis_Eck_2
+  target_column: Oxygen
+  target_unit: mg/L
+  temporal_resolution_minutes: 10
+  # Features the model sees (cyclical columns are derived from timestamps internally)
+  features:
+    - hour_sin
+    - hour_cos
+    - day_sin
+    - day_cos
+    - Sal
+    - Temp
+    - Oxygen
+  # Raw columns the partner must supply
+  raw_input_columns:
+    - date
+    - Sal
+    - Temp
+    - Oxygen
+
+artifacts:
+  scaler_stats: artifacts/scaler_stats.json
